@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Visualization</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .scene {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .scene.active {
+            display: block;
+        }
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 8px;
+            font: 12px sans-serif;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        .button-group {
+            margin: 20px 0;
+        }
+        .year-slider {
+            width: 100%;
+        }
+        .legend {
+            position: absolute;
+            top: 250px;
+            right: 50px;
+            background: white;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .legend div {
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .instruction {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .nav-button {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 25px;
+            box-shadow: 0 5px #999;
+            transition: all 0.3s ease;
+        }
+        .nav-button:hover {
+            background-color: #45a049;
+        }
+        .nav-button:active {
+            background-color: #3e8e41;
+            box-shadow: 0 2px #666;
+            transform: translateY(4px);
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        #scene-2-content, #scene-3-content {
+            position: relative;
+        }
+        .zoom-container {
+            overflow: hidden;
+        }
+        #country-selector {
+            margin-bottom: 20px;
+            padding: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="intro" class="scene active">
+        <h1>Must personal prosperity come at the cost of the planet?</h1>
+        <p>Should developing countries prioritize economic growth or address climate change urgently? Should they focus solely on growth first? The following slides explore these questions through various comparisons.</p>
+     
+        <div class="nav-button" onclick="showScene(1)">Slide 1: Global CO2 Emissions Over Time - Comparing GDP per capita and CO2 emissions.</div>
+        <div class="nav-button" onclick="showScene(2)">Slide 2: Energy Use vs. GDP per Capita - Examining energy use per capita in relation to GDP per capita.</div>
+        <div class="nav-button" onclick="showScene(3)">Slide 3: Energy Intensity vs. GDP per Capita - Analyzing energy intensity and GDP per capita.</div>
+    </div>   
+
+    <div id="scene-1" class="scene">
+        <h2>CO2 Emissions Over Time</h2>
+        <p>Let's examine CO2 emissions in relation to renewable energy consumption over 20 years. Higher GDP per capita (indicated by larger circles) shows a trend over 20 years of reduced CO2 emissions and increased renewable energy usage. However, is this progress significant if overall energy consumption continues to rise with GDP? Let's investigate further in the next slide.</p>
+        <div class="button-group">
+            <button id="previous-year">Previous Year</button>
+            <button id="next-year">Next Year</button>
+        </div>
+        <div class="button-group">
+            <input type="range" id="year-slider" class="year-slider" min="2000" max="2020" step="1" value="2010">
+            <span id="year-display">2010</span>
+        </div>
+        <div id="scene-1-content"></div>
+        <div class="legend" id="legend"></div>
+        <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
+        <div class="nav-buttons">
+            <div class="nav-button" onclick="showScene(0)">Back to Intro</div>
+            <div class="nav-button" onclick="showScene(2)">Next Slide</div>
+        </div>
+    </div>
+
+    <div id="scene-2" class="scene">
+        <h2>Energy Use vs. GDP per Capita</h2>
+        <p>This graph shows that the increase in GDP per capita doesn't always result in higher energy use per capita. At some point, GDP per capita rises while energy consumption stabilizes or even decreases, suggesting improved energy efficiency. Does this mean higher GDP leads to more environmentally friendly practices? Let's delve into energy efficiency and GDP per capita in the next slide.</p>
+        <div id="scene-2-content">
+            <div class="zoom-container"></div>
+        </div>
+        <div id="scene-2-legend" class="legend"></div>
+        <div id="scene-2-tooltip" class="tooltip"></div>
+        <div class="nav-buttons">
+            <div class="nav-button" onclick="showScene(1)">Previous Slide</div>
+            <div class="nav-button" onclick="showScene(3)">Next Slide</div>
+        </div>
+    </div>
+
+    <div id="scene-3" class="scene">
+        <h2>Energy Intensity vs. GDP per Capita (2000-2020)</h2>
+        <p>This graph shows the energy required (in megajoules) to produce one unit of GDP, adjusted to 2017 prices and purchasing power parity (PPP), referred to as energy intensity. Lower energy intensity indicates a more energy-efficient economy. A decline in energy intensity compared to GDP per capita suggests that economic growth doesn't necessarily conflict with environmental sustainability. As countries grow economically, they tend to become more energy-efficient, addressing environmental impacts in the long term.</p>
+        <select id="country-selector">
+            <option value="United States">United States</option>
+            <!-- Other country options will be populated dynamically -->
+        </select>
+        <div id="scene-3-content"></div>
+        <div id="scene-3-legend" class="legend"></div>
+        <div id="scene-3-tooltip" class="tooltip"></div>
+        <div class="nav-buttons">
+            <div class="nav-button" onclick="showScene(2)">Previous Slide</div>
+            <div class="nav-button" onclick="showScene(0)">Back to Intro</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
