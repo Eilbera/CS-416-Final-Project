@@ -511,7 +511,7 @@ function drawScene2() {
             x: x(country.EnergyUse),
             y: y(country.GDP),
             dx: 800,
-            dy: -100 + index * 80  // Stagger the vertical positions
+            dy: -100 + index * 80  
         }));
 
         function adjustCoordinates(x, y, dx, dy) {
